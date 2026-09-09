@@ -1,12 +1,10 @@
 name: Windows EXE Build
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'APK_Donusturucu.py'
-      - '.github/workflows/windows-exe.yml'
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -15,36 +13,32 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-          cache: 'pip'
+          python-version: '3.12'
 
-      - name: Install build tools
-        shell: pwsh
+      - name: Install PyInstaller
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller
 
-      - name: Syntax check
-        shell: pwsh
+      - name: Check Python source
         run: python -m py_compile APK_Donusturucu.py
 
-      - name: Build EXE
-        shell: pwsh
-        run: pyinstaller --noconfirm --clean --onefile --windowed --name APK_Donusturucu APK_Donusturucu.py
+      - name: Build Windows EXE
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name APK_Donusturucu APK_Donusturucu.py
 
-      - name: Verify EXE
+      - name: Verify output
         shell: pwsh
         run: |
-          if (!(Test-Path 'dist/APK_Donusturucu.exe')) { throw 'EXE üretilmedi' }
-          Get-Item 'dist/APK_Donusturucu.exe' | Format-List Name,Length,LastWriteTime
+          if (!(Test-Path "dist\APK_Donusturucu.exe")) { throw "APK_Donusturucu.exe was not created" }
+          Get-Item "dist\APK_Donusturucu.exe" | Format-List Name,Length,LastWriteTime
 
-      - name: Upload Windows EXE
+      - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: APK_Donusturucu_Windows_x64
