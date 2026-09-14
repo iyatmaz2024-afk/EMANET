@@ -33,15 +33,10 @@ jobs:
           cmdline-tools-version: '15859902'
           packages: 'platform-tools'
 
-      - name: Diagnose Android 17 packages
-        shell: pwsh
-        run: |
-          sdkmanager --list --channel=3 | Select-String -Pattern 'android-37|Cinnamon|build-tools;37|build-tools;36.0.0' | Select-Object -First 80
-
       - name: Install Android 17 SDK
         shell: pwsh
         run: |
-          sdkmanager --channel=3 "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+          sdkmanager --channel=3 "platforms;android-37.0" "build-tools;36.0.0" "platform-tools"
 
       - name: Apply v7 runtime fixes
         shell: pwsh
@@ -49,6 +44,8 @@ jobs:
           $p = 'APK_Donusturucu_v6_1.py'
           $c = Get-Content $p -Raw
           $c = $c.Replace("VERSION='6.1'", "VERSION='7.0'")
+          $c = $c.Replace("sdk/'platforms'/f'android-{SDK_API}'", "sdk/'platforms'/f'android-{SDK_API}.0'")
+          $c = $c.Replace("f'platforms;android-{SDK_API}'", "f'platforms;android-{SDK_API}.0'")
           $c = $c.Replace("run_capture([str(sm),*miss],env=env,timeout=600)", "run_capture([str(sm),'--channel=3',*miss],env=env,timeout=600)")
           Set-Content -Path $p -Value $c -Encoding UTF8
 
