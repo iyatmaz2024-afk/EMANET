@@ -22,15 +22,23 @@ jobs:
           python-version: '3.12'
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
+      - name: Set up current Android SDK tools
         uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: '15859902'
+          packages: 'platform-tools'
 
-      - name: Install Android 17 preview SDK
+      - name: Diagnose Android 17 packages
+        shell: pwsh
+        run: |
+          sdkmanager --list --channel=3 | Select-String -Pattern 'android-37|Cinnamon|build-tools;37|build-tools;36.0.0' | Select-Object -First 80
+
+      - name: Install Android 17 SDK
         shell: pwsh
         run: |
           sdkmanager --channel=3 "platforms;android-37" "build-tools;36.0.0" "platform-tools"
