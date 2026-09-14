@@ -30,17 +30,18 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android 37 components
+      - name: Install Android 17 preview SDK
         shell: pwsh
         run: |
-          sdkmanager "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+          sdkmanager --channel=3 "platforms;android-37" "build-tools;36.0.0" "platform-tools"
 
-      - name: Promote validated build to v7
+      - name: Apply v7 runtime fixes
         shell: pwsh
         run: |
           $p = 'APK_Donusturucu_v6_1.py'
           $c = Get-Content $p -Raw
           $c = $c.Replace("VERSION='6.1'", "VERSION='7.0'")
+          $c = $c.Replace("run_capture([str(sm),*miss],env=env,timeout=600)", "run_capture([str(sm),'--channel=3',*miss],env=env,timeout=600)")
           Set-Content -Path $p -Value $c -Encoding UTF8
 
       - name: Check Python source
