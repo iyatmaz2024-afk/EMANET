@@ -21,27 +21,54 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 37 components
+        shell: pwsh
+        run: |
+          sdkmanager "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+
+      - name: Promote validated build to v7
+        shell: pwsh
+        run: |
+          $p = 'APK_Donusturucu_v6_1.py'
+          $c = Get-Content $p -Raw
+          $c = $c.Replace("VERSION='6.1'", "VERSION='7.0'")
+          Set-Content -Path $p -Value $c -Encoding UTF8
+
+      - name: Check Python source
+        run: python -m py_compile APK_Donusturucu_v6_1.py ci_smoke_test.py
+
+      - name: Real Android APK smoke test
+        run: python ci_smoke_test.py
+
       - name: Install PyInstaller
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller
 
-      - name: Check Python source
-        run: python -m py_compile APK_Donusturucu_v6_1.py
-
       - name: Build Windows EXE
-        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name APK_Donusturucu_Pro_v6_1 APK_Donusturucu_v6_1.py
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name APK_Donusturucu_Pro_v7 APK_Donusturucu_v6_1.py
 
-      - name: Verify output
+      - name: Verify EXE
         shell: pwsh
         run: |
-          if (!(Test-Path "dist\APK_Donusturucu_Pro_v6_1.exe")) { throw "EXE was not created" }
-          Get-Item "dist\APK_Donusturucu_Pro_v6_1.exe" | Format-List Name,Length,LastWriteTime
+          if (!(Test-Path "dist\APK_Donusturucu_Pro_v7.exe")) { throw "EXE was not created" }
+          $f = Get-Item "dist\APK_Donusturucu_Pro_v7.exe"
+          if ($f.Length -lt 5000000) { throw "EXE is unexpectedly small" }
+          $f | Format-List Name,Length,LastWriteTime
 
-      - name: Upload EXE artifact
+      - name: Upload validated EXE
         uses: actions/upload-artifact@v4
         with:
-          name: APK_Donusturucu_Pro_v6_1_Windows_x64
-          path: dist/APK_Donusturucu_Pro_v6_1.exe
+          name: APK_Donusturucu_Pro_v7_Validated_Windows_x64
+          path: dist/APK_Donusturucu_Pro_v7.exe
           if-no-files-found: error
           retention-days: 30
