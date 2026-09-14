@@ -27,21 +27,21 @@ jobs:
           python -m pip install pyinstaller
 
       - name: Check Python source
-        run: python -m py_compile APK_Donusturucu.py
+        run: python -m py_compile APK_Donusturucu_v6_1.py
 
       - name: Build Windows EXE
-        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name APK_Donusturucu APK_Donusturucu.py
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name APK_Donusturucu_Pro_v6_1 APK_Donusturucu_v6_1.py
 
       - name: Verify output
         shell: pwsh
         run: |
-          if (!(Test-Path "dist\APK_Donusturucu.exe")) { throw "APK_Donusturucu.exe was not created" }
-          Get-Item "dist\APK_Donusturucu.exe" | Format-List Name,Length,LastWriteTime
+          if (!(Test-Path "dist\APK_Donusturucu_Pro_v6_1.exe")) { throw "EXE was not created" }
+          Get-Item "dist\APK_Donusturucu_Pro_v6_1.exe" | Format-List Name,Length,LastWriteTime
 
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
-          name: APK_Donusturucu_Windows_x64
-          path: dist/APK_Donusturucu.exe
+          name: APK_Donusturucu_Pro_v6_1_Windows_x64
+          path: dist/APK_Donusturucu_Pro_v6_1.exe
           if-no-files-found: error
           retention-days: 30
